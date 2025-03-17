@@ -46,8 +46,13 @@ pydantic==2.10.6
     # via
     #   -r requirements/requirements.in
     #   fastapi
+    #   pydantic-settings
 pydantic-core==2.27.2
     # via pydantic
+pydantic-settings==2.8.1
+    # via -r requirements/requirements.in
+python-dotenv==1.0.1
+    # via pydantic-settings
 pyyaml==6.0.2
     # via pre-commit
 ruff==0.11.0

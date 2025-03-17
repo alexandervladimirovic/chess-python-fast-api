@@ -4,6 +4,7 @@ sqlalchemy[asyncio]
 asyncpg
 alembic
 pydantic
+pydantic-settings
 
 # dev
 pre-commit
