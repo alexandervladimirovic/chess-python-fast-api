@@ -3,4 +3,9 @@ uvicorn
 sqlalchemy
 alembic
 pydantic
+
+# dev
 pre-commit
+mypy
+ruff
+isort
