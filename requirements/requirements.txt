@@ -6,6 +6,8 @@ annotated-types==0.7.0
     # via pydantic
 anyio==4.9.0
     # via starlette
+asyncpg==0.30.0
+    # via -r requirements/requirements.in
 cfgv==3.4.0
     # via pre-commit
 click==8.1.8
