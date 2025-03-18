@@ -1,8 +1,7 @@
-from sqlalchemy.orm import Mapped, as_declarative, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
-@as_declarative()
-class Base:
+class Base(DeclarativeBase):
     """Abstract base class for SQLAlchemy models.
 
     This class provides common functionality for all models
