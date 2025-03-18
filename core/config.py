@@ -22,7 +22,6 @@ class Settings(BaseSettings):
 
     postgres_db_url: str
     db_echo: bool = True
-    # db_echo: bool = False
 
     class Config:
         env_file = ".env"
