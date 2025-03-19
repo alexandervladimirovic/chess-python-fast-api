@@ -39,7 +39,7 @@ class DatabaseHelper:
             expire_on_commit=False,
         )
 
-    def get_scoped_session(self) -> async_scoped_session:
+    def get_scoped_session(self) -> async_scoped_session[AsyncSession]:
         """Create and return a scoped session bound to the current async task.
 
         Returns:
@@ -59,9 +59,27 @@ class DatabaseHelper:
             AsyncSession: The async database session.
 
         """
-        async with self.get_scoped_session() as session:
+        async with self.session_factory() as session:
             yield session
-            await session.remove()
+            await session.close()
+
+    async def scoped_session_dependency(
+        self,
+    ) -> AsyncGenerator[async_scoped_session[AsyncSession], None]:
+        """Async generator that provides scoped database session to current async task.
+
+        Method creates scoped session that is tied to current async task
+        using 'async_scoped_session'. The session is yield to the caller for usage in
+        context of current task, and automatic closed after the task is
+        completed.
+
+        Yields:
+        AsyncSession: An async database session bound to the current async task.
+
+        """
+        session = self.get_scoped_session()
+        yield session
+        await session.close()
 
 
 db_helper = DatabaseHelper(
