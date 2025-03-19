@@ -24,6 +24,7 @@ class Settings(BaseSettings):
 
     """
 
+    api_v1_prefix: str = "/api/v1"
     postgres_db_url: str
     db_echo: bool = True
 
