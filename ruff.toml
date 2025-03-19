@@ -45,7 +45,7 @@ select = [
     "F",     # Pyflakes
     "RUF",   # Ruff
 ]
-ignore = ["D100", "D104", "D106", "D107"]
+ignore = ["D100", "D104", "D105", "D106", "D107"]
 
 
 fixable = ["E", "W", "F", "B", "I", "N", "D"]
