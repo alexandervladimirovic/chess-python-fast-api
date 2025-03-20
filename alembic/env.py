@@ -6,6 +6,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
+from api_v1 import users  # noqa: F401 - because use to find models for migrations.
 from core.config import settings
 from core.models import Base
 
@@ -54,21 +55,7 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection: Connection) -> None:
-    """Run database migrations using Alembic.
-
-    Function configures Alembic context with provided database connection and metadata,
-    begins a transaction, and runs the migrations.
-
-    Args:
-        connection (Connection): Database connection used for running the migrations.
-
-    Returns:
-        None: This function does not return. It performs database migration operations.
-
-    Raises:
-        AlembicException: If error occurs during the migration process.
-
-    """
+    """Run database migrations using Alembic."""
     context.configure(connection=connection, target_metadata=target_metadata)
 
     with context.begin_transaction():
