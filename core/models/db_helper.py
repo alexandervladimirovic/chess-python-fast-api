@@ -83,6 +83,6 @@ class DatabaseHelper:
 
 
 db_helper = DatabaseHelper(
-    url=settings.postgres_db_url,
-    echo=settings.db_echo,
+    url=settings.database.url,
+    echo=settings.database.echo,
 )
