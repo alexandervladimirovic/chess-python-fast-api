@@ -11,3 +11,7 @@ pre-commit
 mypy
 ruff
 isort
+types-PyYAML
+types-greenlet
+types-psycopg2
+types-ujson

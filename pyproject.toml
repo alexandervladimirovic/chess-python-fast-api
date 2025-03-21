@@ -8,12 +8,8 @@ dependencies = [
     "alembic>=1.15.1",
     "asyncpg>=0.30.0",
     "fastapi>=0.115.11",
-    "isort>=6.0.1",
-    "mypy>=1.15.0",
-    "pre-commit>=4.1.0",
     "pydantic>=2.10.6",
     "pydantic-settings>=2.8.1",
-    "ruff>=0.11.0",
     "sqlalchemy[asyncio]>=2.0.39",
     "uvicorn>=0.34.0",
 ]
@@ -24,4 +20,8 @@ dev = [
     "ruff>=0.11.0",
     "pre-commit>=4.1.0",
     "isort>=6.0.1",
+    "types-pyyaml>=6.0.12.20241230",
+    "types-greenlet>=3.1.0.20250318",
+    "types-psycopg2>=2.9.21.20250318",
+    "types-ujson>=5.10.0.20240515",
 ]
