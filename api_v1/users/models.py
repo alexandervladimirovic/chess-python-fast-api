@@ -1,11 +1,29 @@
 from datetime import date, datetime
 from typing import Optional
 
-from sqlalchemy import ForeignKey, String, func
-from sqlalchemy.dialects.postgresql import ENUM
+from sqlalchemy import Enum, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.models import Base
+
+from .mixin import DescriptionMixin
+from .utils import GenderEnum
+
+# Max length for 'User' model
+MAX_LENGTH_USERNAME = 30
+MAX_LENGTH_EMAIL = 255
+MAX_LENGTH_PASSWORD_HASH = 100
+# Max length for 'Profile' model
+MAX_LENGTH_NAME = 25
+MAX_LENGTH_SURNAME = 35
+MAX_LENGTH_BIOGRAPHY = 300
+MAX_LENGTH_AVATAR_URL = 255
+# Max length for 'Country' model
+MAX_LENGTH_COUNTRY_NAME = 50
+MAX_LENGTH_COUNTRY_CODE = 2
+# Max length for 'Rank' model
+MAX_LENGTH_RANK_NAME = 30
+MAX_LENGTH_RANK_ABBREVIATION = 3
 
 
 class User(Base):
@@ -28,9 +46,13 @@ class User(Base):
 
     __tablename__ = "users"
 
-    username: Mapped[str] = mapped_column(String(30), unique=True)
-    email: Mapped[str] = mapped_column(String(255), unique=True)
-    password_hash: Mapped[str] = mapped_column(String(100))
+    username: Mapped[str] = mapped_column(
+        String(MAX_LENGTH_USERNAME), index=True, unique=True
+    )
+    email: Mapped[str] = mapped_column(
+        String(MAX_LENGTH_EMAIL), unique=True, index=True
+    )
+    password_hash: Mapped[str] = mapped_column(String(MAX_LENGTH_PASSWORD_HASH))
     date_joined: Mapped[datetime] = mapped_column(
         default=func.now(), server_default=func.now()
     )
@@ -73,20 +95,20 @@ class Profile(Base):
 
     __tablename__ = "profiles"
 
-    name: Mapped[Optional[str]] = mapped_column(String(25))
-    surname: Mapped[Optional[str]] = mapped_column(String(35))
-    gender: Mapped[ENUM] = mapped_column(
-        ENUM("Male", "Female", "Not Defined", name="gender_enum"), default="Not Defined"
+    name: Mapped[Optional[str]] = mapped_column(String(MAX_LENGTH_NAME))
+    surname: Mapped[Optional[str]] = mapped_column(String(MAX_LENGTH_SURNAME))
+    gender: Mapped[GenderEnum] = mapped_column(
+        Enum(GenderEnum, name="gender_enum"), default=GenderEnum.NOT_DEFINED
     )
     date_of_birth: Mapped[Optional[date]] = mapped_column()
-    biography: Mapped[Optional[str]] = mapped_column(String(300))
-    avatar_url: Mapped[Optional[str]] = mapped_column(String(255))
+    biography: Mapped[Optional[str]] = mapped_column(String(MAX_LENGTH_BIOGRAPHY))
+    avatar_url: Mapped[Optional[str]] = mapped_column(String(MAX_LENGTH_AVATAR_URL))
     updated_at: Mapped[datetime] = mapped_column(
         default=func.now(),
         onupdate=func.now(),
     )
     # One-To-One
-    user_id: Mapped[int] = mapped_column(ForeignKey(User.id), unique=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True)
 
     # One-To-Many
     country_id: Mapped[int] = mapped_column(ForeignKey("countries.id"))
@@ -101,7 +123,7 @@ class Profile(Base):
         return f"<Profile({self.user_id=}, {self.name if self.name else 'No name'})>"
 
 
-class Country(Base):
+class Country(DescriptionMixin, Base):
     """Model country.
 
     Represents a country where user is located or associated with.
@@ -119,9 +141,8 @@ class Country(Base):
 
     __tablename__ = "countries"
 
-    name: Mapped[str] = mapped_column(String(50), unique=True)
-    code: Mapped[str] = mapped_column(String(2), unique=True)
-    description: Mapped[Optional[str]] = mapped_column(String(300))
+    name: Mapped[str] = mapped_column(String(MAX_LENGTH_COUNTRY_NAME), unique=True)
+    code: Mapped[str] = mapped_column(String(MAX_LENGTH_COUNTRY_CODE), unique=True)
 
     # Link to 'Profile' model
     profiles: Mapped[Profile] = relationship(back_populates="country")
@@ -130,31 +151,31 @@ class Country(Base):
         return f"<Country({self.name} ({self.code}))>"
 
 
-class Rank(Base):
+class Rank(DescriptionMixin, Base):
     """Model rank.
 
     Represents title associated with user.
 
     Attributes:
         name (str): The name of rank (e.g., Grandmaster, International Master).
-        acronym (str): The abbreviation for rank (e.g., GM, IM).
+        abbreviation (str): The abbreviation for rank (e.g., GM, IM).
         description (str): Optional description for rank.
 
     Relationships:
         profiles (Profile): Many-To-One relationship with `Profile` model,
         representing all users with this rank.
 
-
     """
 
     __tablename__ = "ranks"
 
-    name: Mapped[str] = mapped_column(String(30), unique=True)
-    acronym: Mapped[str] = mapped_column(String(3), unique=True)
-    description: Mapped[Optional[str]] = mapped_column(String(300))
+    name: Mapped[str] = mapped_column(String(MAX_LENGTH_RANK_NAME), unique=True)
+    abbreviation: Mapped[str] = mapped_column(
+        String(MAX_LENGTH_RANK_ABBREVIATION), unique=True
+    )
 
     # Link to 'Profile' model
     profiles: Mapped[Profile] = relationship(back_populates="rank")
 
     def __repr__(self):
-        return f"<Rank({self.name} ({self.acronym}))>"
+        return f"<Rank({self.name} ({self.abbreviation}))>"
