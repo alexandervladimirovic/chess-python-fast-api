@@ -6,7 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.models import Base
 
-from .mixin import DescriptionMixin
+from .mixin import DescriptionMixin, TimestampMixin
 from .utils import GenderEnum
 
 # Max length for 'User' model
@@ -24,6 +24,8 @@ MAX_LENGTH_COUNTRY_CODE = 2
 # Max length for 'Rank' model
 MAX_LENGTH_RANK_NAME = 30
 MAX_LENGTH_RANK_ABBREVIATION = 3
+# Max length for 'Role' model
+MAX_LEN_ROLE_NAME = 100
 
 
 class User(Base):
@@ -54,10 +56,10 @@ class User(Base):
     )
     password_hash: Mapped[str] = mapped_column(String(MAX_LENGTH_PASSWORD_HASH))
     date_joined: Mapped[datetime] = mapped_column(
-        default=func.now(), server_default=func.now()
+        default=datetime.now, server_default=func.now()
     )
     last_login: Mapped[datetime] = mapped_column(
-        default=func.now(),
+        default=datetime.now,
         onupdate=func.now(),
     )
     is_active: Mapped[bool] = mapped_column(default=True)
@@ -104,7 +106,7 @@ class Profile(Base):
     biography: Mapped[Optional[str]] = mapped_column(String(MAX_LENGTH_BIOGRAPHY))
     avatar_url: Mapped[Optional[str]] = mapped_column(String(MAX_LENGTH_AVATAR_URL))
     updated_at: Mapped[datetime] = mapped_column(
-        default=func.now(),
+        default=datetime.now,
         onupdate=func.now(),
     )
     # One-To-One
@@ -123,7 +125,7 @@ class Profile(Base):
         return f"<Profile({self.user_id=}, {self.name if self.name else 'No name'})>"
 
 
-class Country(DescriptionMixin, Base):
+class Country(DescriptionMixin, TimestampMixin, Base):
     """Model country.
 
     Represents a country where user is located or associated with.
@@ -151,10 +153,10 @@ class Country(DescriptionMixin, Base):
         return f"<Country({self.name} ({self.code}))>"
 
 
-class Rank(DescriptionMixin, Base):
+class Rank(DescriptionMixin, TimestampMixin, Base):
     """Model rank.
 
-    Represents title associated with user.
+    Represents rank associated with user profile.
 
     Attributes:
         name (str): The name of rank (e.g., Grandmaster, International Master).
@@ -179,3 +181,27 @@ class Rank(DescriptionMixin, Base):
 
     def __repr__(self):
         return f"<Rank({self.name} ({self.abbreviation}))>"
+
+
+class Role(DescriptionMixin, TimestampMixin, Base):
+    """Model role.
+
+    Represents a user role in database.
+
+    Model is used to define various roles that users can have, such as
+    'player', 'admin', 'moderator', etc.
+
+    Attributes:
+        name (str): Unique name of the role, e.g., 'player', 'admin'.
+        description(str): Optional description for roles. Submitted from:
+        DescriptionMixin.
+        created_at (datetime): Timestamp created role. Submitted from: TimestampMixin.
+        updated_at (datetime): Timestamp updsted role. Submitted from: TimestampMixin.
+
+    """
+
+    __tablename__ = "roles"
+    name: Mapped[str] = mapped_column(String(MAX_LEN_ROLE_NAME), unique=True)
+
+    def __repr__(self):
+        return f"<Role({self.name})>"
