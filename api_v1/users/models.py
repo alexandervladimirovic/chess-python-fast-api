@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import date, datetime
 from typing import Optional
 
@@ -6,9 +8,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.models import Base
 
-from .association_tables import (
-    roles_privileges_association_table,  # noqa: F401 - need import for alembic migrations
-    users_roles_association_table,  # noqa: F401
+from .association_tables import (  # noqa: F401 - because use to find models for migrations.
+    RolePrivilegeAssociation,
+    UserRoleAssociation,
 )
 from .mixin import DescriptionMixin, TimestampMixin
 from .utils import GenderEnum
@@ -29,15 +31,13 @@ MAX_LENGTH_COUNTRY_CODE = 2
 MAX_LENGTH_RANK_NAME = 30
 MAX_LENGTH_RANK_ABBREVIATION = 3
 # Max length for 'Role' model
-MAX_LENGTH_ROLE_NAME = 100
+MAX_LENGTH_ROLE_NAME = 50
 # Max length for 'Privilege' model
-MAX_LENGTH_PRIVILEGE_NAME = 200
+MAX_LENGTH_PRIVILEGE_NAME = 100
 
 
 class User(Base):
-    """Model for users.
-
-    Represents user in system with basic account information.
+    """Represents user in system with basic account information.
 
     Attributes:
         username (str): Unique username for user.
@@ -55,14 +55,19 @@ class User(Base):
     __tablename__ = "users"
 
     username: Mapped[str] = mapped_column(
-        String(MAX_LENGTH_USERNAME), index=True, unique=True
+        String(MAX_LENGTH_USERNAME),
+        index=True,
+        unique=True,
     )
     email: Mapped[str] = mapped_column(
-        String(MAX_LENGTH_EMAIL), unique=True, index=True
+        String(MAX_LENGTH_EMAIL),
+        unique=True,
+        index=True,
     )
     password_hash: Mapped[str] = mapped_column(String(MAX_LENGTH_PASSWORD_HASH))
     date_joined: Mapped[datetime] = mapped_column(
-        default=datetime.now, server_default=func.now()
+        default=datetime.now,
+        server_default=func.now(),
     )
     last_login: Mapped[datetime] = mapped_column(
         default=datetime.now,
@@ -70,17 +75,18 @@ class User(Base):
     )
     is_active: Mapped[bool] = mapped_column(default=True)
 
-    # link to 'Profile' model
-    profile: Mapped["Profile"] = relationship(back_populates="user")
+    profile: Mapped[Profile] = relationship(back_populates="user")
+    roles: Mapped[list[Role]] = relationship(
+        secondary="users_roles_association_table",
+        back_populates="users",
+    )
 
     def __repr__(self):
         return f"<User({self.id=}, {self.username=}, {self.email=})>"
 
 
 class Profile(Base):
-    """Model profile user.
-
-    Contains detailed personal information for user.
+    """Contains detailed personal information for user.
 
     Attributes:
         name (str): First name for user (Optional).
@@ -106,7 +112,8 @@ class Profile(Base):
     name: Mapped[Optional[str]] = mapped_column(String(MAX_LENGTH_NAME))
     surname: Mapped[Optional[str]] = mapped_column(String(MAX_LENGTH_SURNAME))
     gender: Mapped[GenderEnum] = mapped_column(
-        Enum(GenderEnum, name="gender_enum"), default=GenderEnum.NOT_DEFINED
+        Enum(GenderEnum, name="gender_enum"),
+        default=GenderEnum.NOT_DEFINED,
     )
     date_of_birth: Mapped[Optional[date]] = mapped_column()
     biography: Mapped[Optional[str]] = mapped_column(String(MAX_LENGTH_BIOGRAPHY))
@@ -115,26 +122,26 @@ class Profile(Base):
         default=datetime.now,
         onupdate=func.now(),
     )
-    # One-To-One
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True)
-
-    # One-To-Many
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id"),
+        unique=True,
+    )
     country_id: Mapped[int] = mapped_column(ForeignKey("countries.id"))
-    rank_id: Mapped[Optional[int]] = mapped_column(ForeignKey("ranks.id"), default=None)
+    rank_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("ranks.id"),
+        default=None,
+    )
 
-    # link to models
-    user: Mapped["User"] = relationship(back_populates="profile")
-    country: Mapped["Country"] = relationship(back_populates="profiles")
-    rank: Mapped[Optional["Rank"]] = relationship(back_populates="profiles")
+    user: Mapped[User] = relationship(back_populates="profile")
+    country: Mapped[Country] = relationship(back_populates="profiles")
+    rank: Mapped[Optional[Rank]] = relationship(back_populates="profiles")
 
     def __repr__(self):
         return f"<Profile({self.user_id=}, {self.name if self.name else 'No name'})>"
 
 
 class Country(DescriptionMixin, TimestampMixin, Base):
-    """Model country.
-
-    Represents a country where user is located or associated with.
+    """Represents a country where user is located or associated with.
 
     Attributes:
         name (str): The name of the country. This is unique.
@@ -149,10 +156,15 @@ class Country(DescriptionMixin, TimestampMixin, Base):
 
     __tablename__ = "countries"
 
-    name: Mapped[str] = mapped_column(String(MAX_LENGTH_COUNTRY_NAME), unique=True)
-    code: Mapped[str] = mapped_column(String(MAX_LENGTH_COUNTRY_CODE), unique=True)
+    name: Mapped[str] = mapped_column(
+        String(MAX_LENGTH_COUNTRY_NAME),
+        unique=True,
+    )
+    code: Mapped[str] = mapped_column(
+        String(MAX_LENGTH_COUNTRY_CODE),
+        unique=True,
+    )
 
-    # Link to 'Profile' model
     profiles: Mapped[Profile] = relationship(back_populates="country")
 
     def __repr__(self):
@@ -160,9 +172,7 @@ class Country(DescriptionMixin, TimestampMixin, Base):
 
 
 class Rank(DescriptionMixin, TimestampMixin, Base):
-    """Model rank.
-
-    Represents rank associated with user profile.
+    """Represents rank associated with user profile.
 
     Attributes:
         name (str): The name of rank (e.g., Grandmaster, International Master).
@@ -177,12 +187,15 @@ class Rank(DescriptionMixin, TimestampMixin, Base):
 
     __tablename__ = "ranks"
 
-    name: Mapped[str] = mapped_column(String(MAX_LENGTH_RANK_NAME), unique=True)
+    name: Mapped[str] = mapped_column(
+        String(MAX_LENGTH_RANK_NAME),
+        unique=True,
+    )
     abbreviation: Mapped[str] = mapped_column(
-        String(MAX_LENGTH_RANK_ABBREVIATION), unique=True
+        String(MAX_LENGTH_RANK_ABBREVIATION),
+        unique=True,
     )
 
-    # Link to 'Profile' model
     profiles: Mapped[Profile] = relationship(back_populates="rank")
 
     def __repr__(self):
@@ -190,9 +203,7 @@ class Rank(DescriptionMixin, TimestampMixin, Base):
 
 
 class Role(DescriptionMixin, TimestampMixin, Base):
-    """Model role.
-
-    Represents a user role in database.
+    """Represents a user role in database.
 
     Model is used to define various roles that users can have, such as
     'player', 'admin', 'moderator', etc.
@@ -207,16 +218,26 @@ class Role(DescriptionMixin, TimestampMixin, Base):
     """
 
     __tablename__ = "roles"
-    name: Mapped[str] = mapped_column(String(MAX_LENGTH_ROLE_NAME), unique=True)
+    name: Mapped[str] = mapped_column(
+        String(MAX_LENGTH_ROLE_NAME),
+        unique=True,
+    )
+
+    users: Mapped[list[User]] = relationship(
+        secondary="users_roles_association_table",
+        back_populates="roles",
+    )
+    privileges: Mapped[list[Privilege]] = relationship(
+        secondary="roles_privileges_association_table",
+        back_populates="roles",
+    )
 
     def __repr__(self):
         return f"<Role({self.name})>"
 
 
 class Privilege(DescriptionMixin, TimestampMixin, Base):
-    """Model privilege.
-
-    Privileges can define various permissions or capabilities that role possesses.
+    """Privileges can define various permissions or capabilities that role possesses.
 
     Attributes:
         name (str): Unique name of privilege, e.g., 'create', 'delete'.
@@ -230,6 +251,11 @@ class Privilege(DescriptionMixin, TimestampMixin, Base):
     __tablename__ = "privileges"
 
     name: Mapped[str] = mapped_column(String(MAX_LENGTH_PRIVILEGE_NAME))
+
+    roles: Mapped[list[Role]] = relationship(
+        secondary="roles_privileges_association_table",
+        back_populates="privileges",
+    )
 
     def __repr__(self):
         return f"<Privilege({self.name})>"
