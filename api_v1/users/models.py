@@ -6,6 +6,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.models import Base
 
+from .association_tables import (
+    roles_privileges_association_table,  # noqa: F401 - need import for alembic migrations
+    users_roles_association_table,  # noqa: F401
+)
 from .mixin import DescriptionMixin, TimestampMixin
 from .utils import GenderEnum
 
@@ -25,7 +29,9 @@ MAX_LENGTH_COUNTRY_CODE = 2
 MAX_LENGTH_RANK_NAME = 30
 MAX_LENGTH_RANK_ABBREVIATION = 3
 # Max length for 'Role' model
-MAX_LEN_ROLE_NAME = 100
+MAX_LENGTH_ROLE_NAME = 100
+# Max length for 'Privilege' model
+MAX_LENGTH_PRIVILEGE_NAME = 200
 
 
 class User(Base):
@@ -192,7 +198,7 @@ class Role(DescriptionMixin, TimestampMixin, Base):
     'player', 'admin', 'moderator', etc.
 
     Attributes:
-        name (str): Unique name of the role, e.g., 'player', 'admin'.
+        name (str): Unique name of role, e.g., 'player', 'admin'.
         description(str): Optional description for roles. Submitted from:
         DescriptionMixin.
         created_at (datetime): Timestamp created role. Submitted from: TimestampMixin.
@@ -201,7 +207,29 @@ class Role(DescriptionMixin, TimestampMixin, Base):
     """
 
     __tablename__ = "roles"
-    name: Mapped[str] = mapped_column(String(MAX_LEN_ROLE_NAME), unique=True)
+    name: Mapped[str] = mapped_column(String(MAX_LENGTH_ROLE_NAME), unique=True)
 
     def __repr__(self):
         return f"<Role({self.name})>"
+
+
+class Privilege(DescriptionMixin, TimestampMixin, Base):
+    """Model privilege.
+
+    Privileges can define various permissions or capabilities that role possesses.
+
+    Attributes:
+        name (str): Unique name of privilege, e.g., 'create', 'delete'.
+        description(str): Optional description for roles. Submitted from:
+        DescriptionMixin.
+        created_at (datetime): Timestamp created role. Submitted from: TimestampMixin.
+        updated_at (datetime): Timestamp updsted role. Submitted from: TimestampMixin.
+
+    """
+
+    __tablename__ = "privileges"
+
+    name: Mapped[str] = mapped_column(String(MAX_LENGTH_PRIVILEGE_NAME))
+
+    def __repr__(self):
+        return f"<Privilege({self.name})>"
