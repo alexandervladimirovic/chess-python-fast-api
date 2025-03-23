@@ -8,10 +8,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.models import Base
 
-from .association_tables import (  # noqa: F401 - because use to find models for migrations.
-    RolePrivilegeAssociation,
-    UserRoleAssociation,
-)
 from .mixin import DescriptionMixin, TimestampMixin
 from .utils import GenderEnum
 
