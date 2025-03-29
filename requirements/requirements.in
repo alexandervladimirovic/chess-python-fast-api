@@ -6,6 +6,7 @@ alembic
 pydantic
 pydantic-settings
 pyjwt[crypto]
+argon2-cffi
 
 # dev
 pre-commit
