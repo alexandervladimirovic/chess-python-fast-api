@@ -47,6 +47,32 @@ class AuthenticationJWT(BaseModel):
     algorithm: str
 
 
+class HashPassword(BaseModel):
+    """Config for password hashing using Argon2.
+
+    Class defines param for configuring Argon2 password hashing algorithm.
+    Settings are used determine time cost, memory cost, parallelism, of the hash
+    generation process.
+
+    Attributes:
+        time_cost (int): Number iterations for hashing algorithm.
+        memory_cost (int): Amount of memory (in KiB) used by the algorithm.
+        parallelism (int): Number parallels computations algorithm should
+        perform.
+        hash_len (int): Length result hash in bytes.
+        salt_len (int): Length salt used in hashing process in bytes.
+        encoding (str): Encoding for result hash.
+
+    """
+
+    time_cost: int
+    memory_cost: int
+    parallelism: int
+    hash_len: int
+    salt_len: int
+    encoding: str
+
+
 class Settings(BaseSettings):
     """Main class for application settings.
 
@@ -66,6 +92,7 @@ class Settings(BaseSettings):
     app: AppSettings
     database: DatabaseSettings
     jwt: AuthenticationJWT
+    hash_password: HashPassword
 
     model_config = SettingsConfigDict(validate_default=True)
 
