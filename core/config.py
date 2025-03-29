@@ -32,6 +32,21 @@ class DatabaseSettings(BaseModel):
     echo: bool
 
 
+class AuthenticationJWT(BaseModel):
+    """Class for work with JWT authentication using public and private keys.
+
+    Attributes:
+        private_key_path (Path): Path to private key file for JWT signature.
+        public_key_path (Path): Path to public key file for verifying the JWT
+        signature.
+
+    """
+
+    privave_key_path: Path
+    public_key_path: Path
+    algorithm: str
+
+
 class Settings(BaseSettings):
     """Main class for application settings.
 
@@ -39,8 +54,9 @@ class Settings(BaseSettings):
     app, database, and other configurations.
 
     Attributes:
-        app (appSettings): Application settings.
-        database (Database Settings): Database settings.
+        app (AppSettings): Application settings.
+        database (DatabaseSettings): Database settings.
+        jwt (AuthenticationJWT): JWT settings.
 
     Methods:
         from_yaml(path:Path): Loads config from YAML file.
@@ -49,6 +65,7 @@ class Settings(BaseSettings):
 
     app: AppSettings
     database: DatabaseSettings
+    jwt: AuthenticationJWT
 
     model_config = SettingsConfigDict(validate_default=True)
 
