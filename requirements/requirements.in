@@ -5,6 +5,7 @@ asyncpg
 alembic
 pydantic
 pydantic-settings
+pyjwt[crypto]
 
 # dev
 pre-commit
