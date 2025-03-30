@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import yaml
+from argon2 import PasswordHasher
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -72,6 +73,17 @@ class HashPassword(BaseModel):
     salt_len: int
     encoding: str
 
+    def create_hasher(self) -> PasswordHasher:
+        """Create and return config instance PasswordHasher."""
+        return PasswordHasher(
+            time_cost=self.time_cost,
+            memory_cost=self.memory_cost,
+            parallelism=self.parallelism,
+            hash_len=self.hash_len,
+            salt_len=self.salt_len,
+            encoding=self.encoding,
+        )
+
 
 class Settings(BaseSettings):
     """Main class for application settings.
@@ -123,3 +135,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings.from_yaml(CONFIG_PATH)
+ph = Settings.hash_password.create_hasher()
