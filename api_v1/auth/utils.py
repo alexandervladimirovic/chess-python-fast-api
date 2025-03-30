@@ -1,13 +1,18 @@
+import datetime
+
 import jwt
 
 from core.config import ph, settings
 
 
+# headers?
 def encode_jwt(
     payload: dict,
-    private_key: str = settings.jwt.privave_key_path.read_text(),
+    private_key: str = settings.jwt.private_key_path.read_text(),
     algorithm: str = settings.jwt.algorithm,
-) -> str:
+    expire_minutes: int = settings.jwt.access_token_expires_in_minutes,
+    expire_timedelta: datetime.timedelta | None = None,
+):
     """Encode data (payload) in JWT using private key and algorithm.
 
     Parameters
@@ -21,14 +26,25 @@ def encode_jwt(
         str: Encoded JWT as string.
 
     """
+    to_encode = payload.copy()
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
+
+    if expire_timedelta:
+        expire = now + expire_timedelta
+    else:
+        expire = now + datetime.timedelta(minutes=expire_minutes)
+
+    to_encode.update(exp=expire, iat=now)
+
     encoded = jwt.encode(
-        payload=payload,
+        payload=to_encode,
         key=private_key,
         algorithm=algorithm,
     )
-    return str(encoded)
+    return encoded
 
 
+# headers?
 def decode_jwt(
     token: str | bytes,
     public_key: str = settings.jwt.public_key_path.read_text(),
@@ -55,6 +71,24 @@ def decode_jwt(
     return decoded
 
 
-def hash_password(raw_password: str) -> str:
+# exc
+def hash_password(raw_password: str):
     """Hash raw password using Argon2 algorithm."""
-    return str(ph.hash(raw_password))
+    return ph.hash(raw_password)
+
+
+# rehash and exc
+def check_password(raw_password: str, hash_password: str) -> bool:
+    """Check whether enter password matches hashed password.
+
+    Arguments:
+        password (str): Password entered user.
+        hash_password (str): Hash password to compare enter password
+        with.
+
+    """
+    try:
+        ph.verify(hash_password, raw_password)
+        return True
+    except Exception:
+        return False
