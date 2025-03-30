@@ -81,7 +81,7 @@ class User(Base):
         return f"<User({self.id=}, {self.username=}, {self.email=})>"
 
 
-class Profile(Base):
+class Profile(TimestampMixin, Base):
     """Contains detailed personal information for user.
 
     Attributes:
@@ -91,7 +91,8 @@ class Profile(Base):
         date_of_birth: Birth date of the user (Optional).
         biography (str): Short biography for user (Optional).
         avatar_url (str): URL avatar for user (Optional).
-        updated_at (datetime): Datetime last update profile.
+        created_at (datetime): Timestamp created role. Submitted from: TimestampMixin.
+        updated_at (datetime): Timestamp updsted role. Submitted from: TimestampMixin.
         user_id (int): ID of user associated with profile (One-To-One).
         country_id (int): ID of user country, linked to `Country` model.
         rank_id (int): ID of user rank, linked to `Rank` model. Default is None.
@@ -114,10 +115,6 @@ class Profile(Base):
     date_of_birth: Mapped[Optional[date]] = mapped_column()
     biography: Mapped[Optional[str]] = mapped_column(String(MAX_LENGTH_BIOGRAPHY))
     avatar_url: Mapped[Optional[str]] = mapped_column(String(MAX_LENGTH_AVATAR_URL))
-    updated_at: Mapped[datetime] = mapped_column(
-        default=datetime.now,
-        onupdate=func.now(),
-    )
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id"),
         unique=True,
@@ -142,7 +139,12 @@ class Country(DescriptionMixin, TimestampMixin, Base):
     Attributes:
         name (str): The name of the country. This is unique.
         code (str): The ISO 2-letter code of the country. This is unique.
-        description (str): Optional description for country.
+        description(str): Optional description for country. Submitted from:
+        DescriptionMixin.
+        created_at (datetime): Timestamp created country. Submitted from:
+        TimestampMixin.
+        updated_at (datetime): Timestamp updated country. Submitted from:
+        TimestampMixin.
 
     Relationships:
         profiles (Profile): Many-To-One relationship with the `Profile` model,
@@ -173,7 +175,10 @@ class Rank(DescriptionMixin, TimestampMixin, Base):
     Attributes:
         name (str): The name of rank (e.g., Grandmaster, International Master).
         abbreviation (str): The abbreviation for rank (e.g., GM, IM).
-        description (str): Optional description for rank.
+        description(str): Optional description for rank. Submitted from:
+        DescriptionMixin.
+        created_at (datetime): Timestamp created rank. Submitted from: TimestampMixin.
+        updated_at (datetime): Timestamp updated rank. Submitted from: TimestampMixin.
 
     Relationships:
         profiles (Profile): Many-To-One relationship with `Profile` model,
@@ -209,7 +214,7 @@ class Role(DescriptionMixin, TimestampMixin, Base):
         description(str): Optional description for roles. Submitted from:
         DescriptionMixin.
         created_at (datetime): Timestamp created role. Submitted from: TimestampMixin.
-        updated_at (datetime): Timestamp updsted role. Submitted from: TimestampMixin.
+        updated_at (datetime): Timestamp updated role. Submitted from: TimestampMixin.
 
     """
 
@@ -237,10 +242,12 @@ class Privilege(DescriptionMixin, TimestampMixin, Base):
 
     Attributes:
         name (str): Unique name of privilege, e.g., 'create', 'delete'.
-        description(str): Optional description for roles. Submitted from:
+        description(str): Optional description for privilege. Submitted from:
         DescriptionMixin.
-        created_at (datetime): Timestamp created role. Submitted from: TimestampMixin.
-        updated_at (datetime): Timestamp updsted role. Submitted from: TimestampMixin.
+        created_at (datetime): Timestamp created privilege. Submitted from:
+        TimestampMixin.
+        updated_at (datetime): Timestamp updated privilege. Submitted from:
+        TimestampMixin.
 
     """
 
