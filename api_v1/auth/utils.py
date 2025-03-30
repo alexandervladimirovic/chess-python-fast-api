@@ -1,13 +1,13 @@
 import jwt
 
-from core.config import settings
+from core.config import ph, settings
 
 
 def encode_jwt(
     payload: dict,
     private_key: str = settings.jwt.privave_key_path.read_text(),
     algorithm: str = settings.jwt.algorithm,
-):
+) -> str:
     """Encode data (payload) in JWT using private key and algorithm.
 
     Parameters
@@ -26,7 +26,7 @@ def encode_jwt(
         key=private_key,
         algorithm=algorithm,
     )
-    return encoded
+    return str(encoded)
 
 
 def decode_jwt(
@@ -44,7 +44,7 @@ def decode_jwt(
 
     Returns
     -------
-        dict: Decoded data (payload) from the JWT.
+        Decoded data (payload) from the JWT.
 
     """
     decoded = jwt.decode(
@@ -53,3 +53,8 @@ def decode_jwt(
         algorithms=[algorithm],
     )
     return decoded
+
+
+def hash_password(raw_password: str) -> str:
+    """Hash raw password using Argon2 algorithm."""
+    return str(ph.hash(raw_password))
