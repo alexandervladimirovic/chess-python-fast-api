@@ -51,7 +51,7 @@ class RolePrivilegeAssociation(Base):
 
     """
 
-    __tablename__ = "roles_privileges_associaton_table"
+    __tablename__ = "roles_privileges_association_table"
     __table_args__ = (
         UniqueConstraint("role_id", "privilege_id", name="idx_unique_role_privilege"),
     )
