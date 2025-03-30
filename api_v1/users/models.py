@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from typing import Optional
+from uuid import UUID, uuid4
 
 from sqlalchemy import Enum, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -36,6 +37,7 @@ class User(Base):
     """Represents user in system with basic account information.
 
     Attributes:
+        uuid (UUID): Unique identifier for the user (UUID v4).
         username (str): Unique username for user.
         email (str): Unique e-mail for user.
         password_hash (str): Hashed password of user for authentication.
@@ -50,6 +52,7 @@ class User(Base):
 
     __tablename__ = "users"
 
+    uuid: Mapped[UUID] = mapped_column(unique=True, default=uuid4)
     username: Mapped[str] = mapped_column(
         String(MAX_LENGTH_USERNAME),
         index=True,
