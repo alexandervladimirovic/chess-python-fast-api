@@ -46,7 +46,7 @@ class AuthenticationJWT(BaseModel):
 
     """
 
-    privave_key_path: Path
+    private_key_path: Path
     public_key_path: Path
     algorithm: str
     access_token_expires_in_minutes: int
@@ -140,4 +140,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings.from_yaml(CONFIG_PATH)
-ph = Settings.hash_password.create_hasher()
+ph = settings.hash_password.create_hasher()
