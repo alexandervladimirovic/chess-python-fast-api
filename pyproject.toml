@@ -12,6 +12,7 @@ dependencies = [
     "pydantic>=2.10.6",
     "pydantic-settings>=2.8.1",
     "pyjwt[crypto]>=2.10.1",
+    "python-multipart>=0.0.20",
     "sqlalchemy[asyncio]>=2.0.39",
     "uvicorn>=0.34.0",
 ]

@@ -67,6 +67,8 @@ pyjwt==2.10.1
     # via -r requirements/requirements.in
 python-dotenv==1.1.0
     # via pydantic-settings
+python-multipart==0.0.20
+    # via -r requirements/requirements.in
 pyyaml==6.0.2
     # via pre-commit
 ruff==0.11.2
