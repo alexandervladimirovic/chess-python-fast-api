@@ -37,15 +37,20 @@ class AuthenticationJWT(BaseModel):
     """Class for work with JWT authentication using public and private keys.
 
     Attributes:
-        private_key_path (Path): Path to private key file for JWT signature.
-        public_key_path (Path): Path to public key file for verifying the JWT
+        private_key_path (Path): Path private key file for JWT signature.
+        public_key_path (Path): Path public key file for verifying JWT
         signature.
+        algorithm: Algorithm used for signing and verifying JWT.
+        access_token_expires_in_minutes: Expiration time for access token in minutes.
+        refresh_token_expires_in_days: Expiration time for refresh token in days.
 
     """
 
     privave_key_path: Path
     public_key_path: Path
     algorithm: str
+    access_token_expires_in_minutes: int
+    refresh_token_expires_in_days: int
 
 
 class HashPassword(BaseModel):
