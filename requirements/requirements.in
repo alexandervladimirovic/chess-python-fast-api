@@ -5,6 +5,7 @@ asyncpg
 alembic
 pydantic
 pydantic-settings
+pydantic[email]
 pyjwt[crypto]
 argon2-cffi
 python-multipart
