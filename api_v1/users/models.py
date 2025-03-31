@@ -8,8 +8,9 @@ from sqlalchemy import Enum, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.models import Base
+from mixins import DescriptionMixin, TimestampMixin
+from utils import now_with_tz_utc
 
-from .mixin import DescriptionMixin, TimestampMixin
 from .utils import GenderEnum
 
 # Max length for 'User' model
@@ -41,8 +42,8 @@ class User(Base):
         username (str): Unique username for user.
         email (str): Unique e-mail for user.
         password_hash (str): Hashed password of user for authentication.
-        date_joined (datetime): Date and time when the user registered.
-        last_login (datetime): Last date and time when the user logged in.
+        date_joined (datetime): Date and time when the user registered (UTC).
+        last_login (datetime): Last date and time when the user logged in (UTC).
         is_active (bool): Flag whether user account is active. Default is True.
 
     Relationships:
@@ -65,11 +66,11 @@ class User(Base):
     )
     password_hash: Mapped[str] = mapped_column(String(MAX_LENGTH_PASSWORD_HASH))
     date_joined: Mapped[datetime] = mapped_column(
-        default=datetime.now,
+        default=now_with_tz_utc,
         server_default=func.now(),
     )
     last_login: Mapped[datetime] = mapped_column(
-        default=datetime.now,
+        default=now_with_tz_utc,
         onupdate=func.now(),
     )
     is_active: Mapped[bool] = mapped_column(default=True)

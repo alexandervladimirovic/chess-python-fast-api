@@ -4,6 +4,7 @@ from sqlalchemy import ForeignKey, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from core.models.base import Base
+from utils import now_with_tz_utc
 
 
 class UserRoleAssociation(Base):
@@ -30,7 +31,7 @@ class UserRoleAssociation(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
     assigned_at: Mapped[datetime] = mapped_column(
-        default=datetime.now, server_default=func.now()
+        default=now_with_tz_utc, server_default=func.now()
     )
 
 
@@ -59,5 +60,5 @@ class RolePrivilegeAssociation(Base):
     role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
     privilege_id: Mapped[int] = mapped_column(ForeignKey("privileges.id"))
     assigned_at: Mapped[datetime] = mapped_column(
-        default=datetime.now, server_default=func.now()
+        default=now_with_tz_utc, server_default=func.now()
     )
