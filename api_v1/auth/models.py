@@ -11,7 +11,7 @@ from core.models import Base
 from mixins import DescriptionMixin, TimestampMixin
 from utils import now_with_tz_utc
 
-from .utils import GenderEnum
+from .enums import GenderEnum
 
 # Max length for 'User' model
 MAX_LENGTH_USERNAME = 30

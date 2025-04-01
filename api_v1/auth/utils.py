@@ -5,7 +5,6 @@ import jwt
 from core.config import ph, settings
 
 
-# headers?
 def encode_jwt(
     payload: dict,
     private_key: str = settings.jwt.private_key_path.read_text(),
@@ -20,6 +19,9 @@ def encode_jwt(
         payload (dict): Data that will be encoded in JWT.
         private_key (str): Private key for signing the JWT.
         algorithm (str): Algorithm for signing JWT.
+        expire_minutes (int): Token lifetime in minutes.
+        expire_timedelta (timedelta | None): Optional timedelta for setup lifespan
+        token.
 
     Returns
     -------
@@ -44,7 +46,6 @@ def encode_jwt(
     return encoded
 
 
-# headers?
 def decode_jwt(
     token: str | bytes,
     public_key: str = settings.jwt.public_key_path.read_text(),
@@ -82,7 +83,7 @@ def check_password(raw_password: str, hash_password: str) -> bool:
     """Check whether enter password matches hashed password.
 
     Arguments:
-        password (str): Password entered user.
+        raw_password (str): Password entered user.
         hash_password (str): Hash password to compare enter password
         with.
 
