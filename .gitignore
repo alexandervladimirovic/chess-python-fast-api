@@ -144,3 +144,4 @@ cython_debug/
 
 # etc
 certs/
+logs/
