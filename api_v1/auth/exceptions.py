@@ -1,42 +1,49 @@
-# Username Validation
-class UsernameBaseValidationError(Exception):
-    """Base exception class for all username validation errors."""
+from exceptions import BaseLogicError, BaseValidationError
 
 
-class UsernameTooShortError(UsernameBaseValidationError):
+class UsernameOrEmailRequiredError(BaseValidationError):
+    """Raised if username and email not specified during login."""
+
+
+class UsernameValidationError(BaseValidationError):
+    """Exception class for all username validation errors."""
+
+
+class UsernameTooShortOrTooLongError(UsernameValidationError):
     """Raised when validate username. Its length less than 6 charachers."""
 
 
-class InvalidUsernameCharacherError(UsernameBaseValidationError):
+class InvalidUsernameCharacherError(UsernameValidationError):
     """Raised when validate username. Its contain only allowed characters."""
 
 
-# Password Validation
-class PasswordBaseValidationError(Exception):
+class PasswordValidationError(BaseValidationError):
     """Base exception class for all password validation errors."""
 
 
-class PasswordShortLengthError(PasswordBaseValidationError):
+class PasswordShortLengthError(PasswordValidationError):
     """Raised when validate password. Its length less than 8 characters."""
 
 
-class PasswordNoDigitError(PasswordBaseValidationError):
+class PasswordNoDigitError(PasswordValidationError):
     """Raised when validate password. He does not contain digit."""
 
 
-class PasswordNoUpperAndLowerCharError(PasswordBaseValidationError):
+class PasswordNoUpperAndLowerCharError(PasswordValidationError):
     """Raised when validate password. He don't contrain upper and lowercase char."""
 
 
-class NoWhitespaceInPasswordError(PasswordBaseValidationError):
+class NoWhitespaceInPasswordError(PasswordValidationError):
     """Raised when password contains a space."""
 
 
-# Password and confirm_password not equal
-class PasswordNotEqualError(Exception):
-    """Raised when check password when password and confirm_password do not match."""
+class PasswordsNotEqualError(PasswordValidationError):
+    """Raised when check password when password and confirm password do not match."""
 
 
-# Username or email is transmitted during login.
-class UsernameOrEmailRequiredError(Exception):
-    """Raised if username and email not specified during login."""
+class PasswordHashError(BaseLogicError):
+    """Raised when hash is created incorrectly."""
+
+
+class PasswordHashingIsError(PasswordHashError):
+    """Raised when argon2 raised error: HashingError."""
