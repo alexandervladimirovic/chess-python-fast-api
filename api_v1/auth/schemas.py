@@ -1,28 +1,36 @@
 from __future__ import annotations
 
 import re
+from datetime import date
 from typing import Any, Optional
 
 from pydantic import (
-    BaseModel,
     EmailStr,
+    Field,
+    HttpUrl,
+    PositiveInt,
     field_validator,
     model_validator,
 )
 
 from schemas import ChessBaseSchema
 
+from .enums import GenderEnum
 from .exceptions import (
+    DateOfBirthFutureError,
+    DateOfBirthMinAgeError,
     InvalidUsernameCharacherError,
     NoWhitespaceInPasswordError,
     PasswordNoDigitError,
-    PasswordNotEqualError,
     PasswordNoUpperAndLowerCharError,
-    PasswordShortLengthError,
+    PasswordsNotEqualError,
+    ProfileNameOrSurnameInvalidCharacherError,
+    ProfileNameOrSurnameNoWhitespaceError,
     UsernameOrEmailRequiredError,
-    UsernameTooShortError,
 )
 from .utils import hash_password
+
+MIN_AGE = 3
 
 
 class UserLoginSchema(ChessBaseSchema):
@@ -54,19 +62,17 @@ class UserRegisterSchema(ChessBaseSchema):
     for password match and its confirmation.
     """
 
-    username: str
+    username: str = Field(min_length=6, max_length=30)
     email: EmailStr
-    password: str
+    password: str = Field(min_length=8)
     confirm_password: str
-    # profile: ProfileSchema
+    is_active: bool = True
     # roles: list[RolesSchema]
 
     @field_validator("username", mode="before")
     @classmethod
     def validate_username(cls, username: str) -> str:
         """Validate username for complexity and allowed characters."""
-        if len(username) < 6:
-            raise UsernameTooShortError
         if not re.match(r"^[a-zA-Z0-9_]+$", username):
             raise InvalidUsernameCharacherError
         return username
@@ -76,15 +82,13 @@ class UserRegisterSchema(ChessBaseSchema):
     def validate_password_confirmation(cls, values: dict[str, Any]) -> dict[str, Any]:
         """Method for confirm password."""
         if values.get("password") != values.get("confirm_password"):
-            raise PasswordNotEqualError
+            raise PasswordsNotEqualError
         return values
 
     @field_validator("password", mode="before")
     @classmethod
     def validate_and_hash_password(cls, password: str):
         """Check password complexity and return hashed password."""
-        if not password or len(password) < 8:
-            raise PasswordShortLengthError
         if not any(char.isdigit() for char in password):
             raise PasswordNoDigitError
         if not (
@@ -97,7 +101,91 @@ class UserRegisterSchema(ChessBaseSchema):
         return hash_password(password)
 
 
-class TokenSchemas(BaseModel):
+class ProfileCreateSchema(ChessBaseSchema):
+    """Schema for create user profile.
+
+    Schema describes fields required to create a user profile:
+    name, surname, gender, date of birth, biography, avatar URL, and foreign keys.
+    """
+
+    name: str | None = Field(min_length=2, max_length=30, default=None)
+    surname: str | None = Field(min_length=4, max_length=40, default=None)
+    gender: GenderEnum | None = GenderEnum.NOT_DEFINED
+    date_of_birth: date | None = None
+    biography: str | None = Field(max_length=300, default=None)
+    avatar_url: HttpUrl | None = Field(max_length=255, default=None)
+
+    user_id: PositiveInt
+    country_id: PositiveInt
+    rank_id: PositiveInt | None = None
+
+    @field_validator("name", mode="before")
+    @classmethod
+    def validate_name(cls, name: str) -> str | None:
+        """Validate users name to ensure it contain no spaces and allowed char.
+
+        Returns:
+            Optional[str]: Validate name, properly capitalized.
+
+        """
+        if not name:
+            return None
+        if " " in name:
+            raise ProfileNameOrSurnameNoWhitespaceError
+        if not re.match(r"^[a-zA-Z-]+$", name):
+            raise ProfileNameOrSurnameInvalidCharacherError
+        return name.title()
+
+    @field_validator("surname", mode="before")
+    @classmethod
+    def validate_surname(cls, surname: str) -> str | None:
+        """Validate users surname to ensure it contain no spaces and allowed char.
+
+        Returns:
+            Optional[str]: Validate surname, properly capitalized.
+
+        """
+        if not surname:
+            return None
+        if " " in surname:
+            raise ProfileNameOrSurnameNoWhitespaceError
+        if not re.match(r"^[a-zA-Z-]+$", surname):
+            raise ProfileNameOrSurnameInvalidCharacherError
+        return surname.title()
+
+    @field_validator("date_of_birth", mode="before")
+    @classmethod
+    def validate_date_of_birth(cls, date_of_birth: date) -> date | None:
+        """Validate date of birth.
+
+        Validate users date of birth to ensure it's not in future
+        and that user meets min age requirement.
+
+        Returns:
+            Optional[date]: The validated date of birth.
+
+        """
+        if not date_of_birth:
+            return None
+
+        today = date.today()
+
+        if date_of_birth > today:
+            raise DateOfBirthFutureError
+
+        age = today.year - date_of_birth.year
+        if today.month < date_of_birth.month or (
+            today.month == date_of_birth.month and today.day < date_of_birth.day
+        ):
+            age -= 1
+
+        if age < MIN_AGE:
+            raise DateOfBirthMinAgeError
+
+        return date_of_birth
+
+
+class TokenSchema(ChessBaseSchema):
     """Schema for representing a token response."""
 
     token: str
