@@ -69,12 +69,12 @@ class DatabaseHelper:
         """Async generator that provides scoped database session to current async task.
 
         Method creates scoped session that is tied to current async task
-        using 'async_scoped_session'. The session is yield to the caller for usage in
-        context of current task, and automatic closed after the task is
+        using 'async_scoped_session'. Session is yield to caller for usage in
+        context of current task, and automatic closed after task is
         completed.
 
         Yields:
-        AsyncSession: An async database session bound to the current async task.
+        AsyncSession: Async database session bound current async task.
 
         """
         session = self.get_scoped_session()
