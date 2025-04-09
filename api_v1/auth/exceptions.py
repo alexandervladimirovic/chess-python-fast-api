@@ -2,23 +2,23 @@ from exceptions import BaseLogicError, BaseValidationError
 
 
 class ProfileValidationError(BaseValidationError):
-    """."""
+    """Base profile validation exception."""
 
 
 class DateOfBirthMinAgeError(ProfileValidationError):
-    """."""
+    """Raised when date of birth is less than allow age."""
 
 
 class DateOfBirthFutureError(ProfileValidationError):
-    """."""
+    """Raised when date of birth in future."""
 
 
 class ProfileNameOrSurnameInvalidCharacherError(ProfileValidationError):
-    """."""
+    """Raised when profile name or surname contain incorrect char."""
 
 
 class ProfileNameOrSurnameNoWhitespaceError(ProfileValidationError):
-    """."""
+    """Raised when profile name or surname contain whitespace."""
 
 
 class UsernameOrEmailRequiredError(BaseValidationError):
