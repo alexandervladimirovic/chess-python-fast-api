@@ -81,6 +81,10 @@ class DatabaseHelper:
         yield session
         await session.close()
 
+    async def dispose(self) -> None:
+        """Terminate work with database engine async."""
+        await self.engine.dispose()
+
 
 db_helper = DatabaseHelper(
     url=settings.database.url,
