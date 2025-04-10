@@ -4,7 +4,7 @@ from typing import AsyncGenerator
 import uvicorn
 from fastapi import FastAPI
 
-from core.models.db_helper import db_helper
+from database.db_helper import db_helper
 
 
 @asynccontextmanager

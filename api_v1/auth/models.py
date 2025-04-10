@@ -7,7 +7,7 @@ from uuid import UUID, uuid4
 from sqlalchemy import Enum, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from core.models import Base
+from database.base import Base
 from mixins import DescriptionMixin, TimestampMixin
 from utils import now_with_tz_utc
 

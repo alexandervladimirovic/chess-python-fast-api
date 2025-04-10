@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import ForeignKey, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
 
-from core.models.base import Base
+from database.base import Base
 from utils import now_with_tz_utc
 
 
