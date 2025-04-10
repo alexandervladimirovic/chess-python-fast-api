@@ -4,7 +4,7 @@ from datetime import date, datetime
 from typing import Optional
 from uuid import UUID, uuid4
 
-from sqlalchemy import Enum, ForeignKey, String, func
+from sqlalchemy import DateTime, Enum, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.base import Base
@@ -16,7 +16,7 @@ from .enums import GenderEnum
 # Max length for 'User' model
 MAX_LENGTH_USERNAME = 30
 MAX_LENGTH_EMAIL = 255
-MAX_LENGTH_PASSWORD_HASH = 100
+MAX_LENGTH_PASSWORD_HASH = 255
 # Max length for 'Profile' model
 MAX_LENGTH_NAME = 30
 MAX_LENGTH_SURNAME = 40
@@ -66,10 +66,12 @@ class User(Base):
     )
     password_hash: Mapped[str] = mapped_column(String(MAX_LENGTH_PASSWORD_HASH))
     date_joined: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
         default=now_with_tz_utc,
         server_default=func.now(),
     )
     last_login: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
         default=now_with_tz_utc,
         onupdate=func.now(),
     )
