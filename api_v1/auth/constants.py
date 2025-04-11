@@ -1,5 +1,6 @@
 # JWT
 TOKEN_TYPE_FIELD = "type"
+TOKEN_ID_FIELD = "jti"
 ACCESS_TOKEN_TYPE = "access"
 REFRESH_TOKEN_TYPE = "refresh"
 
