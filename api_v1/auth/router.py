@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 
 from .dependencies import (
-    get_current_active_auth_user,
+    get_current_active_user,
     get_current_auth_user_for_refresh,
     http_bearer,
     validate_auth_user,
@@ -19,7 +19,7 @@ router = APIRouter(
 )
 
 
-@router.post("/login/")
+@router.post("/token/")
 def auth_user_ussues_jwt(
     user: Annotated[User, Depends(validate_auth_user)],
 ) -> TokenSchema:
@@ -36,7 +36,7 @@ def auth_user_ussues_jwt(
 
 @router.get("/users/me/")
 def user_check_self_info(
-    user: Annotated[User, Depends(get_current_active_auth_user)],
+    user: Annotated[User, Depends(get_current_active_user)],
 ) -> dict[str, str]:
     """Retrieve current authenticated users information.
 

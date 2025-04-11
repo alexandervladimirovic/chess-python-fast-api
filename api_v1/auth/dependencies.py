@@ -1,10 +1,7 @@
 from typing import Annotated, Any
 
-from fastapi import Depends, Form, HTTPException, status
-from fastapi.security import (
-    HTTPBearer,
-    OAuth2PasswordBearer,
-)
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPBearer, OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jwt.exceptions import InvalidTokenError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -29,7 +26,7 @@ def get_current_token_payload(
     except InvalidTokenError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token error",
+            detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         ) from None
     return payload
@@ -57,23 +54,26 @@ get_current_auth_user_for_refresh = UserGetterFromToken(REFRESH_TOKEN_TYPE)
 
 async def validate_auth_user(
     session: Annotated[AsyncSession, Depends(db_helper.get_scoped_session)],
-    username: str = Form(),
-    password: str = Form(),
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ) -> User:
     """Verify users authentificate by username and password."""
     unauth_exc = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password"
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid username or password",
+        headers={"WWW-Authenticate": "Bearer"},
     )
 
-    if not (user := await get_user_by_username(session, username)):
+    if not (user := await get_user_by_username(session, form_data.username)):
         raise unauth_exc
 
-    if not check_password(raw_password=password, hash_password=user.password_hash):
+    if not check_password(
+        raw_password=form_data.password, hash_password=user.password_hash
+    ):
         raise unauth_exc
 
     if not user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="user inactive"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Inactive user"
         )
 
     return user
@@ -86,7 +86,7 @@ def validate_token_type(payload: dict, token_type: str) -> bool:
         return True
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail=f"invalid token type {current_token_type!r} expected {token_type!r}",
+        detail=f"Invalid token type {current_token_type!r} expected {token_type!r}",
         headers={"WWW-Authenticate": "Bearer"},
     )
 
@@ -98,17 +98,18 @@ async def get_user_by_token_username(session: AsyncSession, payload: dict) -> Us
         return user
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="token invalid",
+        detail="Invalid authentication credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
 
 
-def get_current_active_auth_user(
+def get_current_active_user(
     user: Annotated[User, Depends(get_current_auth_user)],
 ) -> User:
     """Get the current active user."""
     if not user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="user inactive"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Inactive user",
         )
     return user
