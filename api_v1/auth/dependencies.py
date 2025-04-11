@@ -24,11 +24,13 @@ def get_current_token_payload(
 ) -> dict[str, Any]:
     """Get payload from token."""
     try:
-        payload: dict = decode_jwt(token)
+        payload: dict = decode_jwt(token=token)
 
     except InvalidTokenError:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token error"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token error",
+            headers={"WWW-Authenticate": "Bearer"},
         ) from None
     return payload
 
@@ -85,6 +87,7 @@ def validate_token_type(payload: dict, token_type: str) -> bool:
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail=f"invalid token type {current_token_type!r} expected {token_type!r}",
+        headers={"WWW-Authenticate": "Bearer"},
     )
 
 
@@ -94,7 +97,9 @@ async def get_user_by_token_username(session: AsyncSession, payload: dict) -> Us
     if user := await get_user_by_username(session=session, username=username):
         return user
     raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED, detail="token invalid"
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="token invalid",
+        headers={"WWW-Authenticate": "Bearer"},
     )
 
 
