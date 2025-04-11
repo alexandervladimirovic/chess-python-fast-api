@@ -1,3 +1,3 @@
-__all__ = ("association_tables", "models")
+__all__ = ("models",)
 
-from . import association_tables, models
+from . import models
