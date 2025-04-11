@@ -1,4 +1,5 @@
 import datetime
+import uuid
 
 import jwt
 from argon2.exceptions import HashingError, InvalidHashError, VerifyMismatchError
@@ -42,7 +43,11 @@ def encode_jwt(
     else:
         expire = now + datetime.timedelta(minutes=expire_minutes)
 
-    to_encode.update(exp=expire, iat=now)
+    to_encode.update(
+        jti=str(uuid.uuid4()),
+        exp=expire,
+        iat=now,
+    )
 
     encoded = jwt.encode(
         payload=to_encode,
