@@ -4,34 +4,29 @@ from datetime import date, datetime
 from typing import Optional
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, Enum, ForeignKey, String, func
+from sqlalchemy import DateTime, Enum, ForeignKey, String, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.base import Base
 from mixins import DescriptionMixin, TimestampMixin
 from utils import now_with_tz_utc
 
+from .constants import (
+    MAX_LENGTH_AVATAR_URL,
+    MAX_LENGTH_BIOGRAPHY,
+    MAX_LENGTH_COUNTRY_CODE,
+    MAX_LENGTH_COUNTRY_NAME,
+    MAX_LENGTH_EMAIL,
+    MAX_LENGTH_NAME,
+    MAX_LENGTH_PASSWORD_HASH,
+    MAX_LENGTH_PRIVILEGE_NAME,
+    MAX_LENGTH_RANK_ABBREVIATION,
+    MAX_LENGTH_RANK_NAME,
+    MAX_LENGTH_ROLE_NAME,
+    MAX_LENGTH_SURNAME,
+    MAX_LENGTH_USERNAME,
+)
 from .enums import GenderEnum
-
-# Max length for 'User' model
-MAX_LENGTH_USERNAME = 30
-MAX_LENGTH_EMAIL = 255
-MAX_LENGTH_PASSWORD_HASH = 255
-# Max length for 'Profile' model
-MAX_LENGTH_NAME = 30
-MAX_LENGTH_SURNAME = 40
-MAX_LENGTH_BIOGRAPHY = 300
-MAX_LENGTH_AVATAR_URL = 255
-# Max length for 'Country' model
-MAX_LENGTH_COUNTRY_NAME = 50
-MAX_LENGTH_COUNTRY_CODE = 2
-# Max length for 'Rank' model
-MAX_LENGTH_RANK_NAME = 30
-MAX_LENGTH_RANK_ABBREVIATION = 3
-# Max length for 'Role' model
-MAX_LENGTH_ROLE_NAME = 50
-# Max length for 'Privilege' model
-MAX_LENGTH_PRIVILEGE_NAME = 100
 
 
 class User(Base):
@@ -209,6 +204,34 @@ class Rank(DescriptionMixin, TimestampMixin, Base):
         return f"<Rank({self.name} ({self.abbreviation}))>"
 
 
+class UserRoleAssociation(Base):
+    """Represents association between users and roles in system.
+
+    Model is used to associate a user with a specific role. It also stores
+    timestamp when the role was assigned to user.
+
+    Attributes:
+        user_id (int): ID of user.
+        role_id (int): ID of role.
+        assigned_at (datetime): Timestamp when the role was assigned to user.
+
+    Constraints:
+        Unique Constraint: Ensures that user can only have one unique role at time.
+
+    """
+
+    __tablename__ = "users_roles_association_table"
+    __table_args__ = (
+        UniqueConstraint("user_id", "role_id", name="idx_unique_user_role"),
+    )
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
+    assigned_at: Mapped[datetime] = mapped_column(
+        default=now_with_tz_utc, server_default=func.now()
+    )
+
+
 class Role(DescriptionMixin, TimestampMixin, Base):
     """Represents a user role in database.
 
@@ -241,6 +264,35 @@ class Role(DescriptionMixin, TimestampMixin, Base):
 
     def __repr__(self):
         return f"<Role({self.name})>"
+
+
+class RolePrivilegeAssociation(Base):
+    """Represents association between roles and privileges in system.
+
+    This model is used to associate role with specific privilege. It also stores
+    the timestamp when privilege was assigned to role.
+
+    Attributes:
+        role_id (int): ID of role.
+        privilege_id (int): ID of privilege.
+        assigned_at (datetime): Timestamp when the privilege was assigned to role.
+
+    Constraints:
+        UniqueConstraint: Ensures that role can only have one unique privilege at
+        time.
+
+    """
+
+    __tablename__ = "roles_privileges_association_table"
+    __table_args__ = (
+        UniqueConstraint("role_id", "privilege_id", name="idx_unique_role_privilege"),
+    )
+
+    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
+    privilege_id: Mapped[int] = mapped_column(ForeignKey("privileges.id"))
+    assigned_at: Mapped[datetime] = mapped_column(
+        default=now_with_tz_utc, server_default=func.now()
+    )
 
 
 class Privilege(DescriptionMixin, TimestampMixin, Base):
