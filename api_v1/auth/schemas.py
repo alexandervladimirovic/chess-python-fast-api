@@ -15,6 +15,17 @@ from pydantic import (
 
 from schemas import ChessBaseSchema
 
+from .constants import (
+    MAX_LENGTH_AVATAR_URL,
+    MAX_LENGTH_BIOGRAPHY,
+    MAX_LENGTH_NAME,
+    MAX_LENGTH_SURNAME,
+    MIN_AGE,
+    MIN_LENGTH_NAME,
+    MIN_LENGTH_PASSWORD,
+    MIN_LENGTH_SURNAME,
+    MIN_LENGTH_USERNAME,
+)
 from .enums import GenderEnum
 from .exceptions import (
     DateOfBirthFutureError,
@@ -29,8 +40,6 @@ from .exceptions import (
     UsernameOrEmailRequiredError,
 )
 from .utils import hash_password
-
-MIN_AGE = 3
 
 
 class UserLoginSchema(ChessBaseSchema):
@@ -62,9 +71,9 @@ class UserRegisterSchema(ChessBaseSchema):
     for password match and its confirmation.
     """
 
-    username: str = Field(min_length=6, max_length=30)
+    username: str = Field(min_length=MIN_LENGTH_USERNAME, max_length=MAX_LENGTH_NAME)
     email: EmailStr
-    password: str = Field(min_length=8)
+    password: str = Field(min_length=MIN_LENGTH_PASSWORD, alias="password_hash")
     confirm_password: str
     is_active: bool = True
     # roles: list[RolesSchema]
@@ -81,7 +90,7 @@ class UserRegisterSchema(ChessBaseSchema):
     @classmethod
     def validate_password_confirmation(cls, values: dict[str, Any]) -> dict[str, Any]:
         """Method for confirm password."""
-        if values.get("password") != values.get("confirm_password"):
+        if values.get("password_hash") != values.get("confirm_password"):
             raise PasswordsNotEqualError
         return values
 
@@ -108,12 +117,16 @@ class ProfileCreateSchema(ChessBaseSchema):
     name, surname, gender, date of birth, biography, avatar URL, and foreign keys.
     """
 
-    name: str | None = Field(min_length=2, max_length=30, default=None)
-    surname: str | None = Field(min_length=4, max_length=40, default=None)
+    name: str | None = Field(
+        min_length=MIN_LENGTH_NAME, max_length=MAX_LENGTH_NAME, default=None
+    )
+    surname: str | None = Field(
+        min_length=MIN_LENGTH_SURNAME, max_length=MAX_LENGTH_SURNAME, default=None
+    )
     gender: GenderEnum | None = GenderEnum.NOT_DEFINED
     date_of_birth: date | None = None
-    biography: str | None = Field(max_length=300, default=None)
-    avatar_url: HttpUrl | None = Field(max_length=255, default=None)
+    biography: str | None = Field(max_length=MAX_LENGTH_BIOGRAPHY, default=None)
+    avatar_url: HttpUrl | None = Field(max_length=MAX_LENGTH_AVATAR_URL, default=None)
 
     user_id: PositiveInt
     country_id: PositiveInt
@@ -188,5 +201,6 @@ class ProfileCreateSchema(ChessBaseSchema):
 class TokenSchema(ChessBaseSchema):
     """Schema for representing a token response."""
 
-    token: str
-    token_type: str
+    access_token: str
+    refresh_token: str | None = None
+    token_type: str = "Bearer"
