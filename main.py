@@ -4,6 +4,7 @@ from typing import AsyncGenerator
 import uvicorn
 from fastapi import FastAPI
 
+from api_v1.auth.router import router as auth_router
 from database.db_helper import db_helper
 
 
@@ -15,6 +16,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 app = FastAPI(lifespan=lifespan)
+app.include_router(auth_router)
 
 
 if __name__ == "__main__":
